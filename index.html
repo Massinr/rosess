@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rose Bouquet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #0a0305;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  .scene {
+    position: relative;
+    width: 700px;
+    height: 700px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Ambient glow behind bouquet */
+  .glow {
+    position: absolute;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(180,20,40,0.18) 0%, transparent 70%);
+    animation: pulse-glow 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.15); opacity: 1; }
+  }
+
+  /* Falling petals */
+  .petal-particle {
+    position: absolute;
+    width: 8px;
+    height: 10px;
+    background: radial-gradient(ellipse at 40% 30%, #ff6b8a, #8b0020);
+    border-radius: 50% 0 50% 0;
+    opacity: 0;
+    pointer-events: none;
+    animation: fall linear infinite;
+  }
+
+  @keyframes fall {
+    0% { opacity: 0; transform: translateY(-60px) rotate(0deg); }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.4; }
+    100% { opacity: 0; transform: translateY(680px) rotate(720deg); }
+  }
+
+  /* SVG bouquet container */
+  .bouquet-svg {
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 20px 60px rgba(140, 0, 30, 0.5));
+  }
+
+  /* Animation states for bouquet forming */
+  .stem { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw-stem 1s ease forwards; }
+  .leaf { opacity: 0; animation: appear 0.5s ease forwards; }
+  .ribbon { stroke-dasharray: 300; stroke-dashoffset: 300; animation: draw-ribbon 0.8s ease forwards; }
+
+  @keyframes draw-stem { to { stroke-dashoffset: 0; } }
+  @keyframes appear { to { opacity: 1; } }
+  @keyframes draw-ribbon { to { stroke-dashoffset: 0; } }
+
+  /* Individual rose bloom animations */
+  .rose-group { transform-origin: center; opacity: 0; }
+  .rose-group.bloom {
+    animation: bloom-in 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes bloom-in {
+    0% { opacity: 0; transform: scale(0) rotate(-20deg); }
+    60% { opacity: 1; transform: scale(1.08) rotate(3deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  /* Breathing sway for the whole bouquet */
+  .bouquet-inner {
+    animation: sway 6s ease-in-out infinite;
+    transform-origin: center bottom;
+  }
+  @keyframes sway {
+    0%, 100% { transform: rotate(-0.8deg); }
+    50% { transform: rotate(0.8deg); }
+  }
+
+  /* Sparkle dots */
+  .sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #ffccd5;
+    opacity: 0;
+    animation: sparkle-anim ease-in-out infinite;
+  }
+  @keyframes sparkle-anim {
+    0%, 100% { opacity: 0; transform: scale(0); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Dedication text at top */
+  .dedication {
+    text-align: center;
+    margin-bottom: -18px;
+    opacity: 0;
+    animation: fade-down 1.8s ease 0.3s forwards;
+    z-index: 10;
+    position: relative;
+  }
+  .dedication-line1 {
+    color: rgba(255, 180, 195, 0.7);
+    font-size: 1.05rem;
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .dedication-name {
+    color: rgba(255, 210, 220, 0.95);
+    font-size: 2.6rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.12em;
+    display: block;
+    text-shadow: 0 0 40px rgba(200, 20, 50, 0.6), 0 0 80px rgba(180, 10, 35, 0.3);
+  }
+  .dedication-divider {
+    display: block;
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(200,80,100,0.6), transparent);
+    margin: 10px auto 0;
+  }
+  @keyframes fade-down {
+    from { opacity: 0; transform: translateY(-14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Title text */
+  .title {
+    color: rgba(255, 200, 210, 0.85);
+    font-size: 1.5rem;
+    font-weight: 300;
+    font-style: italic;
+    letter-spacing: 0.18em;
+    text-align: center;
+    margin-top: -30px;
+    opacity: 0;
+    animation: fade-up 1.5s ease 3.5s forwards;
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Falling petal particles -->
+<script>
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal-particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.top = '-20px';
+    p.style.animationDuration = (6 + Math.random() * 8) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.transform = `rotate(${Math.random()*360}deg) scale(${0.5 + Math.random()})`;
+    document.body.appendChild(p);
+  }
+</script>
+
+<div class="dedication">
+  <span class="dedication-line1">for the love of my life</span>
+  <span class="dedication-name">Alae</span>
+  <span class="dedication-divider"></span>
+</div>
+
+<div class="scene">
+  <div class="glow"></div>
+
+  <!-- Sparkles -->
+  <script>
+    const sparkleDefs = [
+      {top:'18%',left:'38%',delay:'0.5s',dur:'2.2s'},{top:'14%',left:'55%',delay:'1.1s',dur:'1.8s'},
+      {top:'22%',left:'62%',delay:'2s',dur:'2.5s'},{top:'30%',left:'30%',delay:'0.8s',dur:'2s'},
+      {top:'10%',left:'48%',delay:'1.5s',dur:'1.6s'},{top:'35%',left:'68%',delay:'0.3s',dur:'2.3s'},
+      {top:'15%',left:'33%',delay:'1.8s',dur:'2s'},{top:'40%',left:'26%',delay:'2.5s',dur:'1.9s'}
+    ];
+    sparkleDefs.forEach(s => {
+      const el = document.createElement('div');
+      el.className = 'sparkle';
+      el.style.top = s.top; el.style.left = s.left;
+      el.style.animationDelay = s.delay;
+      el.style.animationDuration = s.dur;
+      document.querySelector('.scene').appendChild(el);
+    });
+  </script>
+
+  <div class="bouquet-inner">
+    <svg class="bouquet-svg" width="440" height="540" viewBox="0 0 440 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Deep red rose gradient -->
+        <radialGradient id="roseCenter" cx="50%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="#ff7090"/>
+          <stop offset="40%" stop-color="#cc1a35"/>
+          <stop offset="100%" stop-color="#5c0010"/>
+        </radialGradient>
+        <!-- Mid rose -->
+        <radialGradient id="roseMid" cx="45%" cy="38%" r="55%">
+          <stop offset="0%" stop-color="#e8304a"/>
+          <stop offset="50%" stop-color="#9e0020"/>
+          <stop offset="100%" stop-color="#400008"/>
+        </radialGradient>
+        <!-- Outer petals -->
+        <radialGradient id="roseOuter" cx="50%" cy="55%" r="60%">
+          <stop offset="0%" stop-color="#c01030"/>
+          <stop offset="60%" stop-color="#7a0018"/>
+          <stop offset="100%" stop-color="#300008"/>
+        </radialGradient>
+        <!-- Leaf gradient -->
+        <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#2d6a1f"/>
+          <stop offset="100%" stop-color="#0e3a08"/>
+        </linearGradient>
+        <!-- Ribbon gradient -->
+        <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#8b0020"/>
+          <stop offset="100%" stop-color="#5c0010"/>
+        </linearGradient>
+        <!-- Stem gradient -->
+        <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#1a4a0e"/>
+          <stop offset="50%" stop-color="#2d6a1f"/>
+          <stop offset="100%" stop-color="#1a4a0e"/>
+        </linearGradient>
+      </defs>
+
+      <!-- STEMS GROUP -->
+      <g style="animation-delay:0s">
+        <!-- Main stems -->
+        <path class="stem" d="M220 490 C220 450, 215 420, 210 380 C205 340, 200 310, 195 280" stroke="url(#stemGrad)" stroke-width="5" stroke-linecap="round" style="animation-delay:0.1s"/>
+        <path class="stem" d="M220 490 C222 455, 225 425, 230 390 C235 355, 240 325, 248 290" stroke="url(#stemGrad)" stroke-width="4.5" stroke-linecap="round" style="animation-delay:0.15s"/>
+        <path class="stem" d="M218 490 C215 460, 210 435, 205 405 C198 365, 185 340, 175 300" stroke="url(#stemGrad)" stroke-width="4" stroke-linecap="round" style="animation-delay:0.2s"/>
+        <path class="stem" d="M222 490 C228 460, 238 430, 250 400 C262 370, 270 350, 272 315" stroke="url(#stemGrad)" stroke-width="3.5" stroke-linecap="round" style="animation-delay:0.25s"/>
+        <path class="stem" d="M219 490 C216 458, 208 432, 198 400 C188 368, 173 348, 162 315" stroke="url(#stemGrad)" stroke-width="3" stroke-linecap="round" style="animation-delay:0.3s"/>
+        <path class="stem" d="M221 490 C224 460, 232 435, 245 410 C260 382, 278 362, 288 330" stroke="url(#stemGrad)" stroke-width="3" stroke-linecap="round" style="animation-delay:0.35s"/>
+        <path class="stem" d="M220 490 C218 462, 213 440, 206 415 C196 382, 182 360, 170 330" stroke="url(#stemGrad)" stroke-width="2.5" stroke-linecap="round" style="animation-delay:0.4s"/>
+      </g>
+
+      <!-- LEAVES -->
+      <g>
+        <path class="leaf" d="M212 380 C195 360, 168 358, 155 340 C168 328, 196 335, 208 358 Z" fill="url(#leafGrad)" style="animation-delay:0.8s"/>
+        <path class="leaf" d="M228 370 C245 348, 272 345, 285 325 C272 315, 245 322, 232 344 Z" fill="url(#leafGrad)" style="animation-delay:0.9s"/>
+        <path class="leaf" d="M200 340 C182 320, 155 318, 142 300 C155 288, 183 296, 196 318 Z" fill="url(#leafGrad)" style="animation-delay:1.0s"/>
+        <path class="leaf" d="M248 330 C265 308, 292 305, 305 285 C292 275, 265 283, 252 305 Z" fill="url(#leafGrad)" style="animation-delay:1.05s"/>
+        <path class="leaf" d="M195 310 C177 290, 150 288, 136 270 C150 258, 178 266, 191 288 Z" fill="url(#leafGrad)" style="animation-delay:1.1s"/>
+        <path class="leaf" d="M252 315 C270 293, 298 290, 312 270 C298 259, 270 266, 256 288 Z" fill="url(#leafGrad)" style="animation-delay:1.15s"/>
+        <!-- Vein lines on leaves -->
+        <line class="leaf" x1="183" y1="360" x2="207" y2="359" stroke="#1a4a0e" stroke-width="0.8" style="animation-delay:1.2s"/>
+        <line class="leaf" x1="245" y1="348" x2="231" y2="347" stroke="#1a4a0e" stroke-width="0.8" style="animation-delay:1.2s"/>
+      </g>
+
+      <!-- RIBBON / WRAP -->
+      <g>
+        <path class="ribbon" d="M170 470 Q220 455 270 470" stroke="url(#ribbonGrad)" stroke-width="18" stroke-linecap="round" fill="none" style="animation-delay:0.6s"/>
+        <path class="ribbon" d="M180 480 Q220 468 260 480" stroke="#b0001e" stroke-width="6" stroke-linecap="round" fill="none" style="animation-delay:0.65s"/>
+        <!-- Ribbon tails -->
+        <path class="leaf" d="M172 472 C160 490, 150 505, 158 520 C165 510, 168 498, 175 485 Z" fill="#8b0020" style="animation-delay:0.7s"/>
+        <path class="leaf" d="M268 472 C280 490, 290 505, 282 520 C275 510, 272 498, 265 485 Z" fill="#8b0020" style="animation-delay:0.75s"/>
+      </g>
+
+      <!-- ROSE MACROS — each is a group of layered petals -->
+
+      <!-- Helper macro: a full rose at cx,cy,size -->
+      <!-- Rose 1 — Center large -->
+      <g class="rose-group" style="animation-delay:1.3s; transform-origin:220px 220px">
+        <!-- Outer petals -->
+        <ellipse cx="220" cy="245" rx="38" ry="22" fill="url(#roseOuter)" opacity="0.9"/>
+        <ellipse cx="188" cy="232" rx="22" ry="34" fill="url(#roseOuter)" opacity="0.85" transform="rotate(-30,188,232)"/>
+        <ellipse cx="252" cy="232" rx="22" ry="34" fill="url(#roseOuter)" opacity="0.85" transform="rotate(30,252,232)"/>
+        <ellipse cx="196" cy="200" rx="22" ry="34" fill="url(#roseOuter)" opacity="0.8" transform="rotate(-55,196,200)"/>
+        <ellipse cx="244" cy="200" rx="22" ry="34" fill="url(#roseOuter)" opacity="0.8" transform="rotate(55,244,200)"/>
+        <!-- Mid petals -->
+        <ellipse cx="220" cy="230" rx="30" ry="18" fill="url(#roseMid)" opacity="0.95"/>
+        <ellipse cx="195" cy="218" rx="18" ry="28" fill="url(#roseMid)" opacity="0.9" transform="rotate(-25,195,218)"/>
+        <ellipse cx="245" cy="218" rx="18" ry="28" fill="url(#roseMid)" opacity="0.9" transform="rotate(25,245,218)"/>
+        <ellipse cx="202" cy="196" rx="18" ry="28" fill="url(#roseMid)" opacity="0.85" transform="rotate(-50,202,196)"/>
+        <ellipse cx="238" cy="196" rx="18" ry="28" fill="url(#roseMid)" opacity="0.85" transform="rotate(50,238,196)"/>
+        <!-- Inner spiral -->
+        <ellipse cx="220" cy="215" rx="22" ry="14" fill="url(#roseCenter)"/>
+        <ellipse cx="213" cy="210" rx="14" ry="18" fill="url(#roseCenter)" transform="rotate(-20,213,210)"/>
+        <ellipse cx="227" cy="210" rx="14" ry="18" fill="url(#roseCenter)" transform="rotate(20,227,210)"/>
+        <!-- Core -->
+        <ellipse cx="220" cy="208" rx="13" ry="10" fill="#ff9aaa" opacity="0.7"/>
+        <ellipse cx="220" cy="206" rx="7" ry="6" fill="#ffccd5" opacity="0.5"/>
+      </g>
+
+      <!-- Rose 2 — Left mid -->
+      <g class="rose-group" style="animation-delay:1.6s; transform-origin:155px 250px">
+        <ellipse cx="155" cy="268" rx="30" ry="18" fill="url(#roseOuter)" opacity="0.9"/>
+        <ellipse cx="128" cy="256" rx="18" ry="28" fill="url(#roseOuter)" opacity="0.85" transform="rotate(-28,128,256)"/>
+        <ellipse cx="182" cy="256" rx="18" ry="28" fill="url(#roseOuter)" opacity="0.85" transform="rotate(28,182,256)"/>
+        <ellipse cx="134" cy="230" rx="18" ry="28" fill="url(#roseOuter)" opacity="0.8" transform="rotate(-52,134,230)"/>
+        <ellipse cx="176" cy="230" rx="18" ry="28" fill="url(#roseOuter)" opacity="0.8" transform="rotate(52,176,230)"/>
+        <ellipse cx="155" cy="253" rx="24" ry="15" fill="url(#roseMid)"/>
+        <ellipse cx="133" cy="243" rx="14" ry="22" fill="url(#roseMid)" transform="rotate(-22,133,243)"/>
+        <ellipse cx="177" cy="243" rx="14" ry="22" fill="url(#roseMid)" transform="rotate(22,177,243)"/>
+        <ellipse cx="140" cy="225" rx="14" ry="22" fill="url(#roseMid)" transform="rotate(-46,140,225)"/>
+        <ellipse cx="170" cy="225" rx="14" ry="22" fill="url(#roseMid)" transform="rotate(46,170,225)"/>
+        <ellipse cx="155" cy="240" rx="18" ry="12" fill="url(#roseCenter)"/>
+        <ellipse cx="149" cy="236" rx="11" ry="15" fill="url(#roseCenter)" transform="rotate(-18,149,236)"/>
+        <ellipse cx="161" cy="236" rx="11" ry="15" fill="url(#roseCenter)" transform="rotate(18,161,236)"/>
+        <ellipse cx="155" cy="233" rx="10" ry="8" fill="#ff9aaa" opacity="0.7"/>
+        <ellipse cx="155" cy="231" rx="5" ry="5" fill="#ffccd5" opacity="0.5"/>
+      </g>
+
+      <!-- Rose 3 — Right mid -->
+      <g class="rose-group" style="animation-delay:1.9s; transform-origin:285px 250px">
+        <ellipse cx="285" cy="268" rx="30" ry="18" fill="url(#roseOuter)" opacity="0.9"/>
+        <ellipse cx="258" cy="256" rx="18" ry="28" fill="url(#roseOuter)" opacity="0.85" transform="rotate(-28,258,256)"/>
+        <ellipse cx="312" cy="256" rx="18" ry="28" fill="url(#roseOuter)" opacity="0.85" transform="rotate(28,312,256)"/>
+        <ellipse cx="264" cy="230" rx="18" ry="28" fill="url(#roseOuter)" opacity="0.8" transform="rotate(-52,264,230)"/>
+        <ellipse cx="306" cy="230" rx="18" ry="28" fill="url(#roseOuter)" opacity="0.8" transform="rotate(52,306,230)"/>
+        <ellipse cx="285" cy="253" rx="24" ry="15" fill="url(#roseMid)"/>
+        <ellipse cx="263" cy="243" rx="14" ry="22" fill="url(#roseMid)" transform="rotate(-22,263,243)"/>
+        <ellipse cx="307" cy="243" rx="14" ry="22" fill="url(#roseMid)" transform="rotate(22,307,243)"/>
+        <ellipse cx="270" cy="225" rx="14" ry="22" fill="url(#roseMid)" transform="rotate(-46,270,225)"/>
+        <ellipse cx="300" cy="225" rx="14" ry="22" fill="url(#roseMid)" transform="rotate(46,300,225)"/>
+        <ellipse cx="285" cy="240" rx="18" ry="12" fill="url(#roseCenter)"/>
+        <ellipse cx="279" cy="236" rx="11" ry="15" fill="url(#roseCenter)" transform="rotate(-18,279,236)"/>
+        <ellipse cx="291" cy="236" rx="11" ry="15" fill="url(#roseCenter)" transform="rotate(18,291,236)"/>
+        <ellipse cx="285" cy="233" rx="10" ry="8" fill="#ff9aaa" opacity="0.7"/>
+        <ellipse cx="285" cy="231" rx="5" ry="5" fill="#ffccd5" opacity="0.5"/>
+      </g>
+
+      <!-- Rose 4 — Far left back -->
+      <g class="rose-group" style="animation-delay:2.1s; transform-origin:110px 290px; opacity:0.75">
+        <ellipse cx="110" cy="305" rx="24" ry="14" fill="url(#roseOuter)" opacity="0.85"/>
+        <ellipse cx="88"  cy="294" rx="14" ry="22" fill="url(#roseOuter)" opacity="0.8" transform="rotate(-25,88,294)"/>
+        <ellipse cx="132" cy="294" rx="14" ry="22" fill="url(#roseOuter)" opacity="0.8" transform="rotate(25,132,294)"/>
+        <ellipse cx="93"  cy="274" rx="14" ry="22" fill="url(#roseOuter)" opacity="0.75" transform="rotate(-48,93,274)"/>
+        <ellipse cx="127" cy="274" rx="14" ry="22" fill="url(#roseOuter)" opacity="0.75" transform="rotate(48,127,274)"/>
+        <ellipse cx="110" cy="292" rx="18" ry="11" fill="url(#roseMid)"/>
+        <ellipse cx="98"  cy="283" rx="11" ry="17" fill="url(#roseMid)" transform="rotate(-20,98,283)"/>
+        <ellipse cx="122" cy="283" rx="11" ry="17" fill="url(#roseMid)" transform="rotate(20,122,283)"/>
+        <ellipse cx="110" cy="280" rx="13" ry="9" fill="url(#roseCenter)"/>
+        <ellipse cx="110" cy="278" rx="6" ry="5" fill="#ff9aaa" opacity="0.6"/>
+      </g>
+
+      <!-- Rose 5 — Far right back -->
+      <g class="rose-group" style="animation-delay:2.2s; transform-origin:330px 290px; opacity:0.75">
+        <ellipse cx="330" cy="305" rx="24" ry="14" fill="url(#roseOuter)" opacity="0.85"/>
+        <ellipse cx="308" cy="294" rx="14" ry="22" fill="url(#roseOuter)" opacity="0.8" transform="rotate(-25,308,294)"/>
+        <ellipse cx="352" cy="294" rx="14" ry="22" fill="url(#roseOuter)" opacity="0.8" transform="rotate(25,352,294)"/>
+        <ellipse cx="313" cy="274" rx="14" ry="22" fill="url(#roseOuter)" opacity="0.75" transform="rotate(-48,313,274)"/>
+        <ellipse cx="347" cy="274" rx="14" ry="22" fill="url(#roseOuter)" opacity="0.75" transform="rotate(48,347,274)"/>
+        <ellipse cx="330" cy="292" rx="18" ry="11" fill="url(#roseMid)"/>
+        <ellipse cx="318" cy="283" rx="11" ry="17" fill="url(#roseMid)" transform="rotate(-20,318,283)"/>
+        <ellipse cx="342" cy="283" rx="11" ry="17" fill="url(#roseMid)" transform="rotate(20,342,283)"/>
+        <ellipse cx="330" cy="280" rx="13" ry="9" fill="url(#roseCenter)"/>
+        <ellipse cx="330" cy="278" rx="6" ry="5" fill="#ff9aaa" opacity="0.6"/>
+      </g>
+
+      <!-- Rose 6 — Left top -->
+      <g class="rose-group" style="animation-delay:2.4s; transform-origin:175px 185px">
+        <ellipse cx="175" cy="200" rx="26" ry="16" fill="url(#roseOuter)" opacity="0.88"/>
+        <ellipse cx="151" cy="190" rx="16" ry="25" fill="url(#roseOuter)" opacity="0.82" transform="rotate(-26,151,190)"/>
+        <ellipse cx="199" cy="190" rx="16" ry="25" fill="url(#roseOuter)" opacity="0.82" transform="rotate(26,199,190)"/>
+        <ellipse cx="158" cy="168" rx="16" ry="25" fill="url(#roseOuter)" opacity="0.77" transform="rotate(-50,158,168)"/>
+        <ellipse cx="192" cy="168" rx="16" ry="25" fill="url(#roseOuter)" opacity="0.77" transform="rotate(50,192,168)"/>
+        <ellipse cx="175" cy="187" rx="20" ry="13" fill="url(#roseMid)"/>
+        <ellipse cx="156" cy="178" rx="12" ry="19" fill="url(#roseMid)" transform="rotate(-21,156,178)"/>
+        <ellipse cx="194" cy="178" rx="12" ry="19" fill="url(#roseMid)" transform="rotate(21,194,178)"/>
+        <ellipse cx="175" cy="175" rx="14" ry="9" fill="url(#roseCenter)"/>
+        <ellipse cx="175" cy="173" rx="7" ry="6" fill="#ff9aaa" opacity="0.65"/>
+        <ellipse cx="175" cy="171" rx="4" ry="3" fill="#ffccd5" opacity="0.5"/>
+      </g>
+
+      <!-- Rose 7 — Right top -->
+      <g class="rose-group" style="animation-delay:2.6s; transform-origin:265px 185px">
+        <ellipse cx="265" cy="200" rx="26" ry="16" fill="url(#roseOuter)" opacity="0.88"/>
+        <ellipse cx="241" cy="190" rx="16" ry="25" fill="url(#roseOuter)" opacity="0.82" transform="rotate(-26,241,190)"/>
+        <ellipse cx="289" cy="190" rx="16" ry="25" fill="url(#roseOuter)" opacity="0.82" transform="rotate(26,289,190)"/>
+        <ellipse cx="248" cy="168" rx="16" ry="25" fill="url(#roseOuter)" opacity="0.77" transform="rotate(-50,248,168)"/>
+        <ellipse cx="282" cy="168" rx="16" ry="25" fill="url(#roseOuter)" opacity="0.77" transform="rotate(50,282,168)"/>
+        <ellipse cx="265" cy="187" rx="20" ry="13" fill="url(#roseMid)"/>
+        <ellipse cx="246" cy="178" rx="12" ry="19" fill="url(#roseMid)" transform="rotate(-21,246,178)"/>
+        <ellipse cx="284" cy="178" rx="12" ry="19" fill="url(#roseMid)" transform="rotate(21,284,178)"/>
+        <ellipse cx="265" cy="175" rx="14" ry="9" fill="url(#roseCenter)"/>
+        <ellipse cx="265" cy="173" rx="7" ry="6" fill="#ff9aaa" opacity="0.65"/>
+        <ellipse cx="265" cy="171" rx="4" ry="3" fill="#ffccd5" opacity="0.5"/>
+      </g>
+
+      <!-- Rose 8 — Top center (tallest) -->
+      <g class="rose-group" style="animation-delay:2.9s; transform-origin:220px 145px">
+        <ellipse cx="220" cy="165" rx="28" ry="17" fill="url(#roseOuter)" opacity="0.9"/>
+        <ellipse cx="194" cy="154" rx="17" ry="27" fill="url(#roseOuter)" opacity="0.84" transform="rotate(-27,194,154)"/>
+        <ellipse cx="246" cy="154" rx="17" ry="27" fill="url(#roseOuter)" opacity="0.84" transform="rotate(27,246,154)"/>
+        <ellipse cx="200" cy="130" rx="17" ry="27" fill="url(#roseOuter)" opacity="0.79" transform="rotate(-51,200,130)"/>
+        <ellipse cx="240" cy="130" rx="17" ry="27" fill="url(#roseOuter)" opacity="0.79" transform="rotate(51,240,130)"/>
+        <ellipse cx="220" cy="151" rx="22" ry="14" fill="url(#roseMid)"/>
+        <ellipse cx="199" cy="141" rx="13" ry="20" fill="url(#roseMid)" transform="rotate(-22,199,141)"/>
+        <ellipse cx="241" cy="141" rx="13" ry="20" fill="url(#roseMid)" transform="rotate(22,241,141)"/>
+        <ellipse cx="205" cy="122" rx="13" ry="20" fill="url(#roseMid)" transform="rotate(-45,205,122)"/>
+        <ellipse cx="235" cy="122" rx="13" ry="20" fill="url(#roseMid)" transform="rotate(45,235,122)"/>
+        <ellipse cx="220" cy="138" rx="16" ry="11" fill="url(#roseCenter)"/>
+        <ellipse cx="212" cy="133" rx="10" ry="14" fill="url(#roseCenter)" transform="rotate(-17,212,133)"/>
+        <ellipse cx="228" cy="133" rx="10" ry="14" fill="url(#roseCenter)" transform="rotate(17,228,133)"/>
+        <ellipse cx="220" cy="130" rx="9" ry="7" fill="#ff9aaa" opacity="0.7"/>
+        <ellipse cx="220" cy="128" rx="5" ry="4" fill="#ffccd5" opacity="0.55"/>
+      </g>
+
+    </svg>
+  </div>
+
+</div>
+
+<p class="title">with love</p>
+
+<script>
+  // Trigger bloom animations with staggered JS timers
+  document.querySelectorAll('.rose-group').forEach((el, i) => {
+    setTimeout(() => {
+      el.classList.add('bloom');
+    }, parseFloat(el.style.animationDelay) * 1000);
+  });
+</script>
+
+</body>
+</html>
